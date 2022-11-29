@@ -107,6 +107,56 @@ train_dataset, labelled_train_dataset, test_dataset = get_data(data_labelled,
                                                                data_unlabelled, 
                                                                batch_size, IMG_SIZE)
 
+class Cut_Paste(layers.Layer):
+    def __init__(self, x_scale = 10, y_scale = 10, IMG_SIZE = (224,224), **kwargs):
+        super().__init__(**kwargs)
+        
+        """
+        defining the x span and the y span of the box to cutout
+        x_scale and y_scale are taken as inputs as % of the width and height of the image
+        size
+        """        
+        self.size_x, self.size_y = IMG_SIZE
+        self.span_x = int(x_scale*self.size_x*0.01)
+        self.span_y = int(y_scale*self.size_y*0.01)
+        
+    #getting the vertices for cut and paste    
+    def get_vertices(self):
+        
+        #determining random points for cut and paste 
+        """ since the images in the dataset have the object of interest in the center of 
+        the Image, the cutout will be taken from the central 25% of the image"""
+        fraction = 0.25
+        vert_x = random.randint(int(self.size_x*0.5*(1-fraction)),
+                               int(self.size_x*0.5*(1+fraction)))        
+        vert_y = random.randint(int(self.size_y*0.5*(1-fraction)),
+                               int(self.size_y*0.5*(1+fraction)))
+        
+        start_x = int(vert_x-self.span_x/2)
+        start_y = int(vert_y-self.span_y/2)
+        end_x = int(vert_x+self.span_x/2)
+        end_y = int(vert_y+self.span_y/2)
+        
+        return start_x, start_y, end_x, end_y
+        
+    def call(self, image):
+        
+        #getting random vertices for cutting
+        cut_start_x, cut_start_y, cut_end_x, cut_end_y = self.get_vertices()
+        
+        #getting the image as a sub-image
+        #image = tf.Variable(image)
+        sub_image = image[cut_start_x:cut_end_x,cut_start_y:cut_end_y,:]
+        
+        #getting random vertices for pasting
+        paste_start_x, paste_start_y, paste_end_x, paste_end_y = self.get_vertices()
+        
+        #replacing a part of the image at random location with sub_image
+        image[paste_start_x:paste_end_x,
+              paste_start_y:paste_end_y,:] = sub_image
+        
+        return tf.convert_to_tensor(image)
+ 
 def get_encoder():
     base_model = keras.applications.resnet50.ResNet50(
         input_shape = INPUT_SHAPE,
@@ -146,6 +196,7 @@ class Contrastive_learning_model(keras.Model):
         self.temperature=temperature
         self.contrastive_augmenter = get_augmenter(**contrastive_augmentation)
         self.classification_augmenter = get_augmenter(**classification_augmentation)
+        self.cut_paste = Cut_Paste(**cut_paste_augmentation)
         self.encoder = get_encoder()
         
         #Non-linear MLP as projection head
@@ -224,6 +275,7 @@ class Contrastive_learning_model(keras.Model):
         # Each image is augmented twice, differently
         augmented_images_1 = self.contrastive_augmenter(images, training=True)
         augmented_images_2 = self.contrastive_augmenter(images, training=True)
+        augmented_images_3 = self.cut_paste.call(images)
         with tf.GradientTape() as tape:
             features_1 = self.encoder(augmented_images_1, training=True)
             features_2 = self.encoder(augmented_images_2, training=True)
