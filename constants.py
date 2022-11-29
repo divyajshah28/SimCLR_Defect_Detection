@@ -16,3 +16,4 @@ width = 128
 # Stronger augmentations for contrastive, weaker ones for supervised training
 contrastive_augmentation = {"min_area": 0.25, "brightness": 0.6, "jitter": 0.2}
 classification_augmentation = {"min_area": 0.75, "brightness": 0.3, "jitter": 0.1}
+cut_paste_augmentation = {"x_scale":10, "y_scale":10, "IMG_SIZE":IMG_SIZE}
