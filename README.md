@@ -33,8 +33,17 @@ Once the SimCLR model is trained on the contrastive learning task, it can be use
 
 ## Project Structure
 
-/Contrastive_learning.py/i contains the main executable file
-/constants.py/i contains the constants and hyperparameters
+How to execute: 
+
+1. Download three files to your computer in the same folder
+/Contrastive_learning.py/i (This is the main program)
+/constants.py/i
+/mvted_ad
+
+2. In /constants.py/i change the wdir to the working directory where /Contrastive_learning.py/i is saved
+3. Import /constants.py/i to your original the main program.
+4. Import /mvtec_ad.py/i to your main program
+5. Execute /Contrastive_learning.py/i from the terminal
 
 ## References
 
