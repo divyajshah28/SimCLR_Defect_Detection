@@ -36,14 +36,6 @@ from tensorflow.keras import layers
 import pathlib
 import random
 
-data_labelled = pathlib.Path(labelled_data_path)
-data_unlabelled = pathlib.Path(unlabelled_data_path)
-
-image_count = len(list(data_labelled.glob('*/*.png'))) + \
-    len(list(data_unlabelled.glob('*/*.png')))
-print("Total number of images is %d" %(image_count))
-
-print(INPUT_SHAPE)
 """
 creating our simclr architecture based on the algorithm explained in :
 https://sh-tsang.medium.com/review-simclr-a-simple-framework-for-contrastive-learning-of-visual-representations-5de42ba0bc66
@@ -63,17 +55,17 @@ def prepare_dataset():
     )
 
     unlabeled_train_dataset = (
-        tfds.load("mvtec_ad", split="unlabelled", as_supervised=True, shuffle_files=True)
+        tfds.load(dataset_name, split="unlabelled", as_supervised=True, shuffle_files=True)
         .shuffle(buffer_size=10 * unlabeled_batch_size)
         .batch(unlabeled_batch_size)
     )
     labeled_train_dataset = (
-        tfds.load("mvtec_ad", split="train", as_supervised=True, shuffle_files=True)
+        tfds.load(dataset_name, split="train", as_supervised=True, shuffle_files=True)
         .shuffle(buffer_size=10 * labeled_batch_size)
         .batch(labeled_batch_size)
     )
     test_dataset = (
-        tfds.load("mvtec_ad", split="test", as_supervised=True)
+        tfds.load(dataset_name, split="test", as_supervised=True)
         .batch(batch_size)
         .prefetch(buffer_size=tf.data.AUTOTUNE)
     )
@@ -371,7 +363,7 @@ pretraining_history = pretraining_model.fit(
     callbacks=[cp_callback]
 )
 
-!mkdir -p saved_model
+os.mkdir(saved_model)
 pretraining_model.save('saved_model/pretraining_model')
 
 print(
