@@ -41,7 +41,7 @@ How to execute:
 * `mvted_ad`
 
 2. In `constants.py` change the wdir to the working directory where `Contrastive_learning.py` is saved
-3. Import `constants.py` to your original the main program.
+3. Import `constants.py` to your original the main program. Change all hyperparameters here.
 4. Import `mvtec_ad.py` to your main program
 5. Execute `Contrastive_learning.py` from the terminal
 
