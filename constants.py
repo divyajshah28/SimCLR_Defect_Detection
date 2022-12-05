@@ -6,6 +6,7 @@ Created on Sat Nov 12 23:46:27 2022
 """
 
 wdir="D:\CS230_Deep_Learning\Projects\SimCLR_Defect_Detection"
+dataset_name="stl10"
 IMG_SIZE = (224,224)
 INPUT_SHAPE = IMG_SIZE + (3,)
 # Algorithm hyperparameters
