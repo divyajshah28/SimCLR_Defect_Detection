@@ -63,17 +63,17 @@ def prepare_dataset():
     )
 
     unlabeled_train_dataset = (
-        tfds.load("stl10", split="unlabelled", as_supervised=True, shuffle_files=True)
+        tfds.load("mvtec_ad", split="unlabelled", as_supervised=True, shuffle_files=True)
         .shuffle(buffer_size=10 * unlabeled_batch_size)
         .batch(unlabeled_batch_size)
     )
     labeled_train_dataset = (
-        tfds.load("stl10", split="train", as_supervised=True, shuffle_files=True)
+        tfds.load("mvtec_ad", split="train", as_supervised=True, shuffle_files=True)
         .shuffle(buffer_size=10 * labeled_batch_size)
         .batch(labeled_batch_size)
     )
     test_dataset = (
-        tfds.load("stl10", split="test", as_supervised=True)
+        tfds.load("mvtec_ad", split="test", as_supervised=True)
         .batch(batch_size)
         .prefetch(buffer_size=tf.data.AUTOTUNE)
     )
