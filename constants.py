@@ -10,8 +10,8 @@ dataset_name="stl10"
 IMG_SIZE = (224,224)
 INPUT_SHAPE = IMG_SIZE + (3,)
 # Algorithm hyperparameters
-batch_size = 2
-num_epochs = 1
+batch_size = 32
+num_epochs = 50
 temperature = 0.1
 width = 128
 # Stronger augmentations for contrastive, weaker ones for supervised training
