@@ -28,11 +28,11 @@ import tensorflow_datasets as tfds
 
 import matplotlib
 import matplotlib.pyplot as plt
-from data_processing import preprocess_image
+#from data_processing import preprocess_image
 from keras.utils import image_dataset_from_directory
 from tensorflow import keras
 from tensorflow.keras import layers
-from movtec_ad import mvtec_ad
+from mvtec_ad import mvtec_ad
 
 import pathlib
 import random
