@@ -18,7 +18,7 @@ tf.config.experimental_run_functions_eagerly(True)
 
 from constants import *
 import sys, os
-sys.path.append(wdir)
+#sys.path.append(wdir)
 import re
 import numpy as np
 import math
