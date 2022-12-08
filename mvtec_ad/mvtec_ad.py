@@ -16,6 +16,7 @@
 """BeeDataset dataset."""
 import json
 import random
+import tarfile
 
 import tensorflow as tf
 import tensorflow_datasets.public_api as tfds
@@ -39,6 +40,7 @@ class MvtecAd(tfds.core.GeneratorBasedBuilder):
   def _info(self) -> tfds.core.DatasetInfo:
     """Returns the dataset metadata."""
     t_shape = (224,224,3)
+    num_classes = 3
     return tfds.core.DatasetInfo(
         builder=self,
         description=_DESCRIPTION,
@@ -47,7 +49,7 @@ class MvtecAd(tfds.core.GeneratorBasedBuilder):
             'image': tfds.features.Image(shape=t_shape),
             # 'label': tfds.features.ClassLabel(names=['bottle', 'cable', 'capsule', 'carpte', 'grid',
                 #'hazelnut', 'leather', 'metal_nut', 'pill', 'screw', 'tile', 'toothbrush', 'transistor', 'wood', 'zipper']),
-            'label': tfds.features.ClassLabel(num_classes=15),
+            'label': tfds.features.ClassLabel(num_classes=num_classes),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
@@ -59,19 +61,39 @@ class MvtecAd(tfds.core.GeneratorBasedBuilder):
 
   def _split_generators(self, dl_manager):
     """Returns SplitGenerators."""
-    path = dl_manager.download_and_extract('https://www.mydrive.ch/shares/38536/3830184030e49fe74747669442f0f282/download/420938113-1629952094/mvtec_anomaly_detection.tar.xz')
+    path = dl_manager.download('https://www.mydrive.ch/shares/38536/3830184030e49fe74747669442f0f282/download/420938113-1629952094/mvtec_anomaly_detection.tar.gz')
+
+    #if Extracted directory already exists, remove it to avoid permission error
+    dirpath = './Extracted'
+    if os.path.exists(dirpath) and os.path.isdir(dirpath):
+          shutil.rmtree(dirpath)
+
+    #Extract contents of tar.gz file into the Extracted directory
+    file = tarfile.open(path)
+    file.extractall('./Extracted')
+    file.close()
+
+    #remove the files which are not folders (data cleaning)
+    os.remove('./Extracted/readme.md')
+    os.remove('./Extracted/licesnce.txt')
+    
+    ex_path = "./Extracted"
     return {
-        'train': self._generate_examples(path, 'train'),
-        'test': self._generate_examples(path, 'test'),
+        'train': self._generate_examples(ex_path, 'train'),
+        'test': self._generate_examples(ex_path, 'test'),
     }
 
   def _generate_examples(self, path, tag):
     # Load labels and image path.
     label_int = 0
+    
     for label in tf.io.gfile.listdir(path):
+        if label_int >= num_classes:
+          break;
+      
         label_folder = tf.io.gfile.join(path, label, tag)
         count = 0
-        for i in tf.io.gfile.glob(str(label_folder)+'/*/*.png'):
+        for image in tf.io.gfile.glob(str(label_folder)+'/*/*.png'):
             count = count + 1
             key = str(label)+tag+str(count)
             yield key, {

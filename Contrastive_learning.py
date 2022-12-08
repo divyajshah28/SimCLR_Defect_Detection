@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 from keras.utils import image_dataset_from_directory
 from tensorflow import keras
 from tensorflow.keras import layers
-from mvtec_ad import mvtec_ad
+#from mvtec_ad import mvtec_ad
 
 import pathlib
 import random
@@ -275,16 +275,16 @@ class Contrastive_learning_model(keras.Model):
     and the batch size and epoch iteration is taken care of internally"""
     
     def train_step(self, data):
-        (unlabeled_images), (labeled_images, labels) = data
-        print(unlabeled_images.shape, labeled_images.shape)
+        (unlabeled_images, _), (labeled_images, labels) = data
+        
         # Both labeled and unlabeled images are used, without labels
         images = tf.concat((unlabeled_images, labeled_images), axis=0)
         # Each image is augmented twice, differently
-        augmented_images_1 = self.contrastive_augmenter(images, training=True)
-        augmented_images_2 = self.contrastive_augmenter(images, training=True)
+        augmented_images_1 = self.contrastive_augmenter(images, training=False)
+        augmented_images_2 = self.contrastive_augmenter(images, training=False)
         with tf.GradientTape() as tape:
-            features_1 = self.encoder(augmented_images_1, training=True)
-            features_2 = self.encoder(augmented_images_2, training=True)
+            features_1 = self.encoder(augmented_images_1, training=False)
+            features_2 = self.encoder(augmented_images_2, training=False)
             # The representations are passed through a projection mlp
             projections_1 = self.projection_head(features_1, training=True)
             projections_2 = self.projection_head(features_2, training=True)
