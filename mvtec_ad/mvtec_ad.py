@@ -20,6 +20,7 @@ import tarfile
 
 import tensorflow as tf
 import tensorflow_datasets.public_api as tfds
+import os
 
 _DESCRIPTION = """
 MVTec AD is a dataset for benchmarking anomaly detection methods with a focus on industrial inspection. It contains over 5000 high-resolution images divided into fifteen different object and texture categories. Each category comprises a set of defect-free training images and a test set of images with various kinds of defects as well as images without defects.
