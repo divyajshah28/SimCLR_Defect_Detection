@@ -51,19 +51,10 @@ def prepare_dataset():
     # with batch sizes selected accordingly
     steps_per_epoch = (unlabeled_dataset_size + labeled_dataset_size) // batch_size
     unlabeled_batch_size = unlabeled_dataset_size // steps_per_epoch
-    labeled_batch_size = 1 #labeled_dataset_size // steps_per_epoch
+    labeled_batch_size = labeled_dataset_size // steps_per_epoch
     print(
         f"batch size is {unlabeled_batch_size} (unlabeled) + {labeled_batch_size} (labeled)"
     )
-
-    """
-    unlabeled_train_dataset = (
-        tfds.load(dataset_name, split="unlabelled", as_supervised=True, shuffle_files=True)
-        .shuffle(buffer_size=10 * unlabeled_batch_size)
-        .batch(unlabeled_batch_size)
-    )
-    """
-
     
     labeled_train_dataset = (
         tfds.load(dataset_name, split="train", as_supervised=True, shuffle_files=True)
@@ -71,33 +62,12 @@ def prepare_dataset():
 
     def image_resize(image, label):
         image = tf.cast(image, tf.float32)
-        image = tf.image.resize(image, (224,224))
+        image = tf.image.resize(image, (96,96))
         return image, label
 
     labeled_train_dataset = labeled_train_dataset.map(image_resize)
     labeled_train_dataset = labeled_train_dataset.batch(labeled_batch_size).prefetch(tf.data.experimental.AUTOTUNE)
-    
-    """
-    dataset_builder = tfds.builder(dataset_name)
-    dataset_builder.download_and_prepare()
-    
-    dataset = dataset_builder.as_dataset()
-    #train_dataset, test_dataset = dataset["train"], dataset["test"]
-    #assert isinstance(train_dataset, tf.data.Dataset)
-
-    train_dataset = train_dataset.map(lambda image: tf.image.resize_with_crop_or_pad(image,224,224))
-    train_dataset = train_dataset.repeat().batch(labeled_batch_size)
-    train_dataset = train_dataset.prefetch(tf.data.experimental.AUTOTUNE)
-    train_features = tf.compat.v1.data.make_one_shot_iterator(train_dataset).get_next()
-    #training_data = (train_features['image'], train_features['label'])
-
-    test_dataset = test_dataset.map(lambda image: tf.image.resize_with_crop_or_pad(image,224,224))
-    test_dataset = test_dataset.repeat().batch(batch_size)
-    test_dataset = test_dataset.prefetch(tf.data.experimental.AUTOTUNE)
-    test_features = tf.compat.v1.data.make_one_shot_iterator(test_dataset).get_next()
-    #test_data = (test_features['image'], test_features['label'])
-    """
-    
+   
     test_dataset = (
         tfds.load(dataset_name, split="test", as_supervised=True)
     )
@@ -105,12 +75,6 @@ def prepare_dataset():
     test_dataset = test_dataset.map(image_resize)
     test_dataset = test_dataset.batch(batch_size).prefetch(tf.data.experimental.AUTOTUNE)
 
-    """
-    # Labeled and unlabeled datasets are zipped together
-    train_dataset = tf.data.Dataset.zip(
-        (unlabeled_train_dataset, labeled_train_dataset)
-    ).prefetch(buffer_size=tf.data.AUTOTUNE)
-    """
     train_dataset = labeled_train_dataset
     
     return train_dataset, labeled_train_dataset, test_dataset
@@ -316,7 +280,7 @@ class Contrastive_learning_model(keras.Model):
         
         # Both labeled and unlabeled images are used, without labels
         #images = tf.concat((unlabeled_images, labeled_images), axis=0)
-        images = tf.images.resize(images, (224,224,3))
+        #images = tf.images.resize(images, (224,224,3))
         # Each image is augmented twice, differently
         augmented_images_1 = self.contrastive_augmenter(images, training=False)
         augmented_images_2 = self.contrastive_augmenter(images, training=False)
@@ -342,7 +306,7 @@ class Contrastive_learning_model(keras.Model):
     
         # Labels are only used in evalutation for an on-the-fly logistic regression
         preprocessed_images = self.classification_augmenter(
-            labeled_images, training=False
+            images, training=False
         )
         with tf.GradientTape() as tape:
             # the encoder is used in inference mode here to avoid regularization
