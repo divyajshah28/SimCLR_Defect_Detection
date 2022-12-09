@@ -46,7 +46,7 @@ Code credits: https://keras.io/examples/vision/semisupervised_simclr/
 
 """
 
-def prepare_dataset():
+def prepare_dataset(dataset_name):
     # Labeled and unlabeled samples are loaded synchronously
     # with batch sizes selected accordingly
     steps_per_epoch = (unlabeled_dataset_size + labeled_dataset_size) // batch_size
@@ -81,7 +81,7 @@ def prepare_dataset():
 
 
 # Load MVtec_AD dataset
-train_dataset, labeld_train_dataset, test_dataset = prepare_dataset()
+train_dataset, labeld_train_dataset, test_dataset = prepare_dataset(dataset_name_downstream)
 
 class Cut_Paste(layers.Layer):
     def __init__(self, x_scale = 10, y_scale = 10, IMG_SIZE = (224,224), **kwargs):
