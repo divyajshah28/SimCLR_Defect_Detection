@@ -366,8 +366,12 @@ pretraining_history = pretraining_model.fit(
     callbacks=[cp_callback]
 )
 
-os.mkdir(saved_model)
-pretraining_model.save('saved_model/pretraining_model')
+saved_model_path = pathlib.Path("./saved_model")
+if os.path.exists(saved_model_path):
+    tf.saved_model.save(pretraining_model, "saved_model")
+else:
+    os.mkdir(saved_model_path)
+    tf.saved_model.save(pretraining_model, "saved_model")
 
 print(
     "Maximal validation accuracy: {:.2f}%".format(
