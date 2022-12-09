@@ -66,16 +66,16 @@ class MvtecAd(tfds.core.GeneratorBasedBuilder):
 
     #if Extracted directory already exists, remove it to avoid permission error
     dirpath = './Extracted'
-    if os.path.exists(dirpath) and os.path.isdir(dirpath):
-          shutil.rmtree(dirpath)
+    #if os.path.exists(dirpath) and os.path.isdir(dirpath):
+    #      shutil.rmtree(dirpath)
 
     #Extract contents of tar.gz file into the Extracted directory
-    file = tarfile.open(path)
-    file.extractall('./Extracted')
-    file.close()
+    #file = tarfile.open(path)
+    #file.extractall('./Extracted')
+    #file.close()
 
     #remove the files which are not folders (data cleaning)
-    os.remove('./Extracted/readme.md')
+    os.remove('./Extracted/readme*')
     os.remove('./Extracted/licesnce.txt')
     
     ex_path = "./Extracted"
