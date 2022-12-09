@@ -135,7 +135,7 @@ class Cut_Paste(layers.Layer):
  
     
 def get_encoder():
-    base_model = keras.applications.resnet50.ResNet50(
+    base_model = keras.applications.vgg16.VGG16(
         input_shape = INPUT_SHAPE,
         include_top = False, 
         weights='imagenet')

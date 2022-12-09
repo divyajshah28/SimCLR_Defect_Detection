@@ -30,7 +30,7 @@ print('dataset loaded.')
 
 
 # Get pre-trained encoder model
-encoder = keras.models.load_model("saved_model/encoder")
+model = keras.models.load_model("saved_model/encoder")
 print('encoder model loaded SUCCESSFULLY.')
 
 # Freeze all layers in the encoder
@@ -39,10 +39,10 @@ for layer in encoder.layers[:]:
 
 
 # Build downstream model for binary classification
-encoder.add(layers.MaxPool2D((2,2), padding='valid'))
-encoder.add(layers.GlobalAveragePooling2D('channels_last'))
-encoder.add(layers.Dense(2)) # output 2 classes, good or anomaly
-encoder.add(layers.Softmax()], name='downstream_model')
+model.add(layers.MaxPool2D((2,2), padding='valid'))
+model.add(layers.GlobalAveragePooling2D('channels_last'))
+model.add(layers.Dense(2)) # output 2 classes, good or anomaly
+model.add(layers.Softmax()], name='downstream_model')
 
 print('finished adding downstream task layers onto encoder model')
 
