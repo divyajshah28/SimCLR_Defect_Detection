@@ -11,7 +11,7 @@ IMG_SIZE = (96,96)
 INPUT_SHAPE = IMG_SIZE + (3,)
 # Algorithm hyperparameters
 batch_size = 64
-num_epochs = 5
+num_epochs = 5 
 temperature = 0.1
 width = 128
 # Stronger augmentations for contrastive, weaker ones for supervised training

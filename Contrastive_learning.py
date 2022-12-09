@@ -24,7 +24,7 @@ import re
 import numpy as np
 import math
 
-import tensorflow_hub as hub
+# import tensorflow_hub as hub
 import tensorflow_datasets as tfds
 
 import matplotlib
@@ -339,46 +339,66 @@ class Contrastive_learning_model(keras.Model):
         # Only the probe metrics are logged at test time
         return {m.name: m.result() for m in self.metrics[2:]}
     
-    
-# Contrastive pretraining
-pretraining_model = Contrastive_learning_model()
-pretraining_model.compile(
-    contrastive_optimizer=keras.optimizers.Adam(),
-    probe_optimizer=keras.optimizers.Adam(),run_eagerly=True
-)
-
-""" the fit function of the keras.Model will call the train_step method.
-If the train_step method is not defined, it will pick the method from the
-parent calss. If defined, it will take the function from the sub-class 
-since the object is defined for the sub-class"""
+if __name__ == '__main__':
 
 
-checkpoint_path = "training_1/cp.ckpt"
-checkpoint_dir = os.path.dirname(checkpoint_path)
+    # Contrastive pretraining
+    pretraining_model = Contrastive_learning_model()
+    pretraining_model.compile(
+        contrastive_optimizer=keras.optimizers.Adam(),
+        probe_optimizer=keras.optimizers.Adam(),run_eagerly=True
+        )
 
-# Create a callback that saves the model's weights
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True,
-                                                 verbose=1)
+    """ the fit function of the keras.Model will call the train_step method.
+    If the train_step method is not defined, it will pick the method from the
+    parent calss. If defined, it will take the function from the sub-class 
+    since the object is defined for the sub-class"""
 
-pretraining_history = pretraining_model.fit(
-    train_dataset, epochs=num_epochs, validation_data=test_dataset,
-    callbacks=[cp_callback]
-)
 
-saved_model_path = pathlib.Path("./saved_model")
-if os.path.exists(saved_model_path):
-    tf.saved_model.save(pretraining_model, "saved_model")
-else:
-    os.mkdir(saved_model_path)
-    tf.saved_model.save(pretraining_model, "saved_model")
+    checkpoint_path = "training_1/cp.ckpt"
+    checkpoint_dir = os.path.dirname(checkpoint_path)
 
-print(
-    "Maximal validation accuracy: {:.2f}%".format(
-        max(pretraining_history.history["val_p_acc"]) * 100
-    )
-)
+    # Create a callback that saves the model's weights
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+        save_weights_only=True,
+        verbose=1)
 
-loss, acc = pretraining_model.evaluate(test_dataset, verbose=2)
-print("Pretraining model, accuracy: {:5.2f}%".format(100 * acc))
+    pretraining_history = pretraining_model.fit(
+        train_dataset, epochs=num_epochs, validation_data=test_dataset,
+        callbacks=[cp_callback]
+        )
 
+    saved_model_path = pathlib.Path("./saved_model")
+    if not os.path.exists(saved_model_path):
+        os.mkdir(saved_model_path)
+    tf.keras.models.save_model(pretraining_model.encoder, "saved_model/encoder")
+#    tf.saved_model.save(pretraining_model, "saved_model/pretraining_model")
+
+    print(
+        "Maximal validation accuracy: {:.2f}%".format(
+            max(pretraining_history.history["val_p_acc"]) * 100
+            )
+        )
+
+    loss, acc = pretraining_model.evaluate(test_dataset, verbose=2)
+    print("Pretraining model, accuracy: {:5.2f}%".format(100 * acc))
+
+
+
+"""
+# Load MVTEC dataset again
+train_dataset, labeld_train_dataset, test_dataset = prepare_dataset()
+
+# Get pre-trained encoder model
+encoder = pretraining_model.encoder
+
+# Build downstream model for binary classification
+downstream_model = keras.Sequential([
+    keras.Input(shape=(None,2,2048)),
+    layers.MaxPool2D((2,2), padding='valid'),
+    layers.GlobalAveragePooling2D('channels_last'),
+    layers.Dense(2), # output 2 classes, good or anomaly
+    layers.Softmax()], name='downstream_model')
+
+
+"""
