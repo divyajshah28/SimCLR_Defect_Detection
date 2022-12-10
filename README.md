@@ -35,15 +35,15 @@ Once the SimCLR model is trained on the contrastive learning task, it can be use
 
 How to execute: 
 
-1. Download three files to your computer in the same folder
-* `Contrastive_learning.py` (This is the main program)
-* `constants.py`
-* `mvted_ad`
-
-2. In `constants.py` change the wdir to the working directory where `Contrastive_learning.py` is saved
-3. Import `constants.py` to your original the main program. Change all hyperparameters here.
-4. Import `mvtec_ad.py` to your main program
-5. Execute `Contrastive_learning.py` from the terminal
+1. Clone the repo to your local machine
+2. Go to `mvec_ad` folder and run `tfds build` to download and build the dataset
+3. Return to the main working directory. Open `constants.py` to change any hyperparameters for your fine tuning task.
+4. Run  `Contrastive_learning.py` to train the SimCLR model for Image classification and save the model. Model will be saved in `./saved_model` directory.
+5. Convert the saved model from  `Tensorflow` to `PyTorch` by following these links:
+  * `Tensorflow` to `Onnx`: https://github.com/onnx/tensorflow-onnx
+  * `Onnx` to `PyTorch`: https://github.com/ENOT-AutoDL/onnx2torch
+6. Copy the `PyTorch` model to `./downstream` directory
+7. Run `downstream.py`
 
 ## References
 
